@@ -11,7 +11,7 @@ display_surface = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Flappy Bird')
 
 bird_image = pygame.image.load('./images/medium_bird.png')
-gravity = .8 
+gravity = .9
 
 class Bird():
     def __init__(self):
@@ -71,7 +71,7 @@ def game_over(score, green, blue, c_color):
     SHOW_RESTART_TEXT = True
 
     restart_font = pygame.font.SysFont("comicsansms", 20)
-    restart_text = restart_font.render("Press any to restart", True, (255, 255, 255))
+    restart_text = restart_font.render("Press any key to restart", True, (255, 255, 255))
 
     score_font = pygame.font.SysFont("comicsansms", 60)
     score_text = score_font.render("SCORE: " + str(score), True, (255, 255, 255))
@@ -111,12 +111,12 @@ def main():
 
     pipes_list = []
     
-    PIPE_HOLE_SIZE = bird.height*4
+    PIPE_HOLE_SIZE = bird.height*5
     PIPE_WIDTH = bird.width * 2
     pipes_list.append(Pipe(PIPE_HOLE_SIZE, PIPE_WIDTH))
 
-    SCREEN_VEL = 1
-    LENGTH_BIAS = 0
+    SCREEN_VEL = 2
+    LENGTH_BIAS = 1.01
 
     SCORE = 0
 
@@ -146,6 +146,8 @@ def main():
                     DRAW_COLISION = not DRAW_COLISION
                 elif event.key == pygame.K_r:
                     main()
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
 
         if DRAW_COLISION:
             pygame.draw.circle(display_surface, (200, 0, 0), bird.get_center(), int(bird.width/2))
@@ -188,8 +190,8 @@ def main():
 
         if pipes_list[len(pipes_list) - 1].x < (screen_width - 4 * PIPE_WIDTH - LENGTH_BIAS):
             pipes_list.append(Pipe(PIPE_HOLE_SIZE, PIPE_WIDTH))
-            SCREEN_VEL += .1
-            LENGTH_BIAS += LENGTH_BIAS / 100
+            SCREEN_VEL += .3
+            LENGTH_BIAS += .3
 
 
         score_text = font.render(str(SCORE), True, (255, 255, 255))
