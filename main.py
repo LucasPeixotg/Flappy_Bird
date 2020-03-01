@@ -10,18 +10,18 @@ screen_height = 700
 display_surface = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Flappy Bird')
 
-bird_image = pygame.image.load('./images/large_bird.png')
-gravity = .8
+bird_image = pygame.image.load('./images/medium_bird.png')
+gravity = .8 
 
 class Bird():
     def __init__(self):
-        self.x = 70
         self.y = screen_height//2
         self.angle = 45
         self.y_vel = 0
         self.image = bird_image
         self.width = bird_image.get_width()
         self.height = bird_image.get_height()
+        self.x = -self.width
 
     def rotate_image(self):
         # Calculate the angle based on the bird's position and the height of the screen
@@ -61,9 +61,46 @@ def check_colision(bird, pipe):
 
     return x_colision and y_colision
 
-def game_over(score):
-    print("GAME OVER; SCORE => ",score)
-    main()
+def game_over(score, green, blue, c_color):
+    clock = pygame.time.Clock()
+
+    SCREEN_GREEN = green
+    SCREEN_BLUE = blue
+    C_TIME_COLOR = c_color
+
+    SHOW_RESTART_TEXT = True
+
+    restart_font = pygame.font.SysFont("comicsansms", 20)
+    restart_text = restart_font.render("Press any to restart", True, (255, 255, 255))
+
+    score_font = pygame.font.SysFont("comicsansms", 60)
+    score_text = score_font.render("SCORE: " + str(score), True, (255, 255, 255))
+
+    while True:
+        display_surface.fill((0, round(SCREEN_GREEN), round(SCREEN_BLUE)))
+
+        SCREEN_BLUE += C_TIME_COLOR
+        SCREEN_GREEN += C_TIME_COLOR
+
+        if SCREEN_GREEN <= 50 or SCREEN_GREEN >= 224:
+            C_TIME_COLOR *= -1
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            elif event.type == pygame.KEYDOWN:
+                main()
+
+        if SHOW_RESTART_TEXT:
+            display_surface.blit(restart_text, (screen_width // 2 - restart_text.get_width() // 2, screen_height // 2 + restart_text.get_height()))
+        
+        display_surface.blit(score_text, (screen_width // 2 - score_text.get_width() // 2, screen_height // 2 - score_text.get_height()))
+
+        SHOW_RESTART_TEXT = not SHOW_RESTART_TEXT
+
+        pygame.display.update()
+        clock.tick(1)
+
 
 def main():
     DRAW_COLISION = False
@@ -74,8 +111,8 @@ def main():
 
     pipes_list = []
     
-    PIPE_HOLE_SIZE = bird.height*5
-    PIPE_WIDTH = screen_width/13
+    PIPE_HOLE_SIZE = bird.height*4
+    PIPE_WIDTH = bird.width * 2
     pipes_list.append(Pipe(PIPE_HOLE_SIZE, PIPE_WIDTH))
 
     SCREEN_VEL = 1
@@ -87,11 +124,12 @@ def main():
 
     SCREEN_GREEN = 224
     SCREEN_BLUE = 255
-    C_TIME_COLOR = -.1
+    C_TIME_COLOR = -.05
 
     while True:
 
         display_surface.fill((0, round(SCREEN_GREEN), round(SCREEN_BLUE)))
+
         SCREEN_BLUE += C_TIME_COLOR
         SCREEN_GREEN += C_TIME_COLOR
 
@@ -102,8 +140,8 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    bird.y_vel = -10 * gravity  
+                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                    bird.y_vel = - 10 * (bird.height/100 + 1) * gravity  
                 elif event.key == pygame.K_c:
                     DRAW_COLISION = not DRAW_COLISION
                 elif event.key == pygame.K_r:
@@ -125,7 +163,10 @@ def main():
         colision = check_colision(bird, pipes_list[0])
         
         if colision:
-            game_over(SCORE)
+            game_over(SCORE, SCREEN_GREEN, SCREEN_BLUE, C_TIME_COLOR)
+
+        if bird.x < 3*bird.width:
+            bird.x += 2
 
 
         # Update Pipes
@@ -152,9 +193,10 @@ def main():
 
 
         score_text = font.render(str(SCORE), True, (255, 255, 255))
-        display_surface.blit(score_text, (screen_width // 2 - score_text.get_width(), 5))
+        display_surface.blit(score_text, (screen_width // 2 - score_text.get_width() // 2, 5))
 
         pygame.display.update()
         clock.tick(60)
+
 
 main()
